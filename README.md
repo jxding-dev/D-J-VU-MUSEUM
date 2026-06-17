@@ -1,26 +1,26 @@
-# DÉJÀ VU MUSEUM / 기시감 박물관
+# 기시감 박물관
 
-Interactive editorial website for a fictional museum where dreams, memories, images, and sentence fragments are misfiled.
+꿈, 기억, 이미지, 문장 조각이 잘못 보관된 가상 박물관을 다루는 인터랙티브 에디토리얼 웹사이트입니다.
 
-## Run
+## 실행
 
-Double-click `run.bat`, or run:
+`run.bat`을 더블클릭하거나 아래 명령을 실행합니다.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Local URL:
+로컬 주소:
 
 ```text
 http://127.0.0.1:5173/
 ```
 
-## Stack
+## 사용 기술
 
 - React + Vite
 - GSAP + ScrollTrigger
 - Motion
-- Three.js via React Three Fiber
-- CSS variables, `clamp()`, `backdrop-filter`, `mix-blend-mode`, `clip-path`
+- React Three Fiber
+- CSS 변수, `clamp()`, `backdrop-filter`, `mix-blend-mode`, `clip-path`
