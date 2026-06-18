@@ -40,8 +40,10 @@ function AdminPage({ data, onChange, onClose, onReset }) {
   const [noteForm, setNoteForm] = useState('')
   const [roomForm, setRoomForm] = useState(blankRoom)
   const [copyState, setCopyState] = useState('JSON 복사')
+  const [editing, setEditing] = useState(null)
 
   const exportJson = useMemo(() => JSON.stringify(data, null, 2), [data])
+  const isEditing = (type) => editing?.type === type
 
   const updateDream = (key, value) => setDreamForm((form) => ({ ...form, [key]: value }))
   const updateImage = (key, value) => setImageForm((form) => ({ ...form, [key]: value }))
@@ -62,60 +64,100 @@ function AdminPage({ data, onChange, onClose, onReset }) {
     reader.readAsDataURL(file)
   }
 
-  const addDream = (event) => {
-    event.preventDefault()
-    if (!dreamForm.title.trim() || !dreamForm.line.trim()) return
+  const clearEditing = () => {
+    setEditing(null)
+    setDreamForm(blankDream)
+    setImageForm(blankImage)
+    setNoteForm('')
+    setRoomForm(blankRoom)
+  }
+
+  const updateItem = (type, index, nextItem) => {
     onChange({
       ...data,
-      dreams: [...data.dreams, { ...dreamForm, title: dreamForm.title.trim(), line: dreamForm.line.trim() }],
+      [type]: data[type].map((item, itemIndex) => (itemIndex === index ? nextItem : item)),
+    })
+  }
+
+  const saveDream = (event) => {
+    event.preventDefault()
+    if (!dreamForm.title.trim() || !dreamForm.line.trim()) return
+    const nextDream = { ...dreamForm, title: dreamForm.title.trim(), line: dreamForm.line.trim() }
+
+    if (isEditing('dreams')) {
+      updateItem('dreams', editing.index, nextDream)
+      clearEditing()
+      return
+    }
+
+    onChange({
+      ...data,
+      dreams: [...data.dreams, nextDream],
     })
     setDreamForm(blankDream)
   }
 
-  const addImage = (event) => {
+  const saveImage = (event) => {
     event.preventDefault()
     if (!imageForm.title.trim() || !imageForm.src.trim()) return
+    const nextImage = {
+      ...imageForm,
+      id: imageForm.id || Date.now(),
+      title: imageForm.title.trim(),
+      src: imageForm.src.trim(),
+      mark: imageForm.mark.trim() || `${imageForm.tag}-${String(data.images.length + 1).padStart(3, '0')}`,
+    }
+
+    if (isEditing('images')) {
+      updateItem('images', editing.index, nextImage)
+      clearEditing()
+      return
+    }
+
     onChange({
       ...data,
-      images: [
-        ...data.images,
-        {
-          ...imageForm,
-          id: Date.now(),
-          title: imageForm.title.trim(),
-          src: imageForm.src.trim(),
-          mark: imageForm.mark.trim() || `${imageForm.tag}-${String(data.images.length + 1).padStart(3, '0')}`,
-        },
-      ],
+      images: [...data.images, nextImage],
     })
     setImageForm(blankImage)
   }
 
-  const addNote = (event) => {
+  const saveNote = (event) => {
     event.preventDefault()
     const note = noteForm.trim()
     if (!note) return
+
+    if (isEditing('notes')) {
+      updateItem('notes', editing.index, note)
+      clearEditing()
+      return
+    }
+
     onChange({ ...data, notes: [...data.notes, note] })
     setNoteForm('')
   }
 
-  const addRoom = (event) => {
+  const saveRoom = (event) => {
     event.preventDefault()
     if (!roomForm.slug.trim() || !roomForm.title.trim()) return
+    const nextRoom = {
+      ...roomForm,
+      slug: roomForm.slug.trim(),
+      title: roomForm.title.trim(),
+      pageNotes: roomForm.pageNotes
+        .split('\n')
+        .map((note) => note.trim())
+        .filter(Boolean),
+    }
+
+    if (isEditing('rooms')) {
+      updateItem('rooms', editing.index, nextRoom)
+      clearEditing()
+      return
+    }
+
     onChange({
       ...data,
-      rooms: [
-        ...data.rooms,
-        {
-          ...roomForm,
-          slug: roomForm.slug.trim(),
-          title: roomForm.title.trim(),
-          pageNotes: roomForm.pageNotes
-            .split('\n')
-            .map((note) => note.trim())
-            .filter(Boolean),
-        },
-      ],
+      rooms: [...data.rooms, nextRoom],
     })
     setRoomForm(blankRoom)
   }
@@ -125,6 +167,23 @@ function AdminPage({ data, onChange, onClose, onReset }) {
       ...data,
       [type]: data[type].filter((_, itemIndex) => itemIndex !== index),
     })
+    if (editing?.type === type && editing.index === index) clearEditing()
+  }
+
+  const editItem = (type, index) => {
+    const item = data[type][index]
+    setEditing({ type, index })
+
+    if (type === 'dreams') setDreamForm({ ...blankDream, ...item })
+    if (type === 'images') setImageForm({ ...blankImage, ...item })
+    if (type === 'notes') setNoteForm(item)
+    if (type === 'rooms') {
+      setRoomForm({
+        ...blankRoom,
+        ...item,
+        pageNotes: Array.isArray(item.pageNotes) ? item.pageNotes.join('\n') : item.pageNotes || '',
+      })
+    }
   }
 
   const copyJson = async () => {
@@ -146,8 +205,8 @@ function AdminPage({ data, onChange, onClose, onReset }) {
       </header>
 
       <div className="admin-grid">
-        <form className="admin-panel" onSubmit={addDream}>
-          <h3>꿈 기록</h3>
+        <form className={isEditing('dreams') ? 'admin-panel is-editing' : 'admin-panel'} onSubmit={saveDream}>
+          <h3>{isEditing('dreams') ? '꿈 기록 수정' : '꿈 기록'}</h3>
           <Field label="시간 / 날짜">
             <input value={dreamForm.date} onChange={(event) => updateDream('date', event.target.value)} />
           </Field>
@@ -163,11 +222,18 @@ function AdminPage({ data, onChange, onClose, onReset }) {
           <Field label="감정">
             <input value={dreamForm.emotion} onChange={(event) => updateDream('emotion', event.target.value)} />
           </Field>
-          <button type="submit">꿈 추가</button>
+          <div className="admin-form-actions">
+            <button type="submit">{isEditing('dreams') ? '수정 저장' : '꿈 추가'}</button>
+            {isEditing('dreams') && (
+              <button type="button" onClick={clearEditing}>
+                취소
+              </button>
+            )}
+          </div>
         </form>
 
-        <form className="admin-panel" onSubmit={addImage}>
-          <h3>이미지 전시</h3>
+        <form className={isEditing('images') ? 'admin-panel is-editing' : 'admin-panel'} onSubmit={saveImage}>
+          <h3>{isEditing('images') ? '이미지 전시 수정' : '이미지 전시'}</h3>
           <Field label="분류">
             <select value={imageForm.tag} onChange={(event) => updateImage('tag', event.target.value)}>
               <option>꿈</option>
@@ -197,19 +263,33 @@ function AdminPage({ data, onChange, onClose, onReset }) {
               <img src={imageForm.src} alt="" />
             </div>
           )}
-          <button type="submit">이미지 추가</button>
+          <div className="admin-form-actions">
+            <button type="submit">{isEditing('images') ? '수정 저장' : '이미지 추가'}</button>
+            {isEditing('images') && (
+              <button type="button" onClick={clearEditing}>
+                취소
+              </button>
+            )}
+          </div>
         </form>
 
-        <form className="admin-panel" onSubmit={addNote}>
-          <h3>문장 메모</h3>
+        <form className={isEditing('notes') ? 'admin-panel is-editing' : 'admin-panel'} onSubmit={saveNote}>
+          <h3>{isEditing('notes') ? '문장 메모 수정' : '문장 메모'}</h3>
           <Field label="메모 문장">
             <textarea required value={noteForm} onChange={(event) => setNoteForm(event.target.value)} />
           </Field>
-          <button type="submit">메모 추가</button>
+          <div className="admin-form-actions">
+            <button type="submit">{isEditing('notes') ? '수정 저장' : '메모 추가'}</button>
+            {isEditing('notes') && (
+              <button type="button" onClick={clearEditing}>
+                취소
+              </button>
+            )}
+          </div>
         </form>
 
-        <form className="admin-panel" onSubmit={addRoom}>
-          <h3>복도 전시실</h3>
+        <form className={isEditing('rooms') ? 'admin-panel is-editing' : 'admin-panel'} onSubmit={saveRoom}>
+          <h3>{isEditing('rooms') ? '복도 전시실 수정' : '복도 전시실'}</h3>
           <Field label="슬러그">
             <input required placeholder="new-room" value={roomForm.slug} onChange={(event) => updateRoom('slug', event.target.value)} />
           </Field>
@@ -235,7 +315,14 @@ function AdminPage({ data, onChange, onClose, onReset }) {
               onChange={(event) => updateRoom('pageNotes', event.target.value)}
             />
           </Field>
-          <button type="submit">전시실 추가</button>
+          <div className="admin-form-actions">
+            <button type="submit">{isEditing('rooms') ? '수정 저장' : '전시실 추가'}</button>
+            {isEditing('rooms') && (
+              <button type="button" onClick={clearEditing}>
+                취소
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -258,22 +345,47 @@ function AdminPage({ data, onChange, onClose, onReset }) {
       </section>
 
       <section className="admin-list">
-        <h3>빠른 삭제</h3>
+        <h3>기존 내용 수정 / 삭제</h3>
         <div>
+          {data.rooms.map((room, index) => (
+            <span className="admin-list-item" key={`room-${room.slug}-${index}`}>
+              <button type="button" onClick={() => editItem('rooms', index)}>
+                전시실 수정 / {room.title}
+              </button>
+              <button type="button" onClick={() => removeItem('rooms', index)}>
+                삭제
+              </button>
+            </span>
+          ))}
           {data.dreams.map((dream, index) => (
-            <button type="button" key={`dream-${dream.title}-${index}`} onClick={() => removeItem('dreams', index)}>
-              꿈 삭제 / {dream.title}
-            </button>
+            <span className="admin-list-item" key={`dream-${dream.title}-${index}`}>
+              <button type="button" onClick={() => editItem('dreams', index)}>
+                꿈 수정 / {dream.title}
+              </button>
+              <button type="button" onClick={() => removeItem('dreams', index)}>
+                삭제
+              </button>
+            </span>
           ))}
           {data.images.map((image, index) => (
-            <button type="button" key={`image-${image.title}-${index}`} onClick={() => removeItem('images', index)}>
-              이미지 삭제 / {image.title}
-            </button>
+            <span className="admin-list-item" key={`image-${image.title}-${index}`}>
+              <button type="button" onClick={() => editItem('images', index)}>
+                이미지 수정 / {image.title}
+              </button>
+              <button type="button" onClick={() => removeItem('images', index)}>
+                삭제
+              </button>
+            </span>
           ))}
           {data.notes.map((note, index) => (
-            <button type="button" key={`note-${index}`} onClick={() => removeItem('notes', index)}>
-              메모 삭제 / {String(index + 1).padStart(2, '0')}
-            </button>
+            <span className="admin-list-item" key={`note-${index}`}>
+              <button type="button" onClick={() => editItem('notes', index)}>
+                메모 수정 / {String(index + 1).padStart(2, '0')}
+              </button>
+              <button type="button" onClick={() => removeItem('notes', index)}>
+                삭제
+              </button>
+            </span>
           ))}
         </div>
       </section>
