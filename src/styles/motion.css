@@ -28,6 +28,21 @@
   border-color: var(--red-bright);
 }
 
+.custom-cursor.is-corridor {
+  z-index: 200;
+  width: 46px;
+  height: 46px;
+  border-color: rgba(179, 58, 46, 0.96);
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(216, 207, 184, 0.86) 48% 52%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(216, 207, 184, 0.86) 48% 52%, transparent 52%),
+    rgba(126, 29, 29, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(7, 6, 5, 0.78),
+    0 0 22px rgba(179, 58, 46, 0.72);
+  mix-blend-mode: normal;
+}
+
 .glitch {
   position: relative;
 }

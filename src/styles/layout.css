@@ -472,6 +472,11 @@
   perspective: 1200px;
 }
 
+.corridor,
+.corridor * {
+  cursor: crosshair;
+}
+
 .corridor::before,
 .corridor::after {
   content: "";

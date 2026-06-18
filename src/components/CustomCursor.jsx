@@ -20,6 +20,7 @@ function CustomCursor() {
       pointRef.current = { x: event.clientX, y: event.clientY }
       document.documentElement.style.setProperty('--mouse-x', `${event.clientX}px`)
       document.documentElement.style.setProperty('--mouse-y', `${event.clientY}px`)
+      cursorRef.current?.classList.toggle('is-corridor', Boolean(event.target.closest('#corridor')))
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(draw)
     }
 
