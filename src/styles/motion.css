@@ -1,46 +1,118 @@
 .custom-cursor {
   position: fixed;
-  left: -18px;
-  top: -18px;
-  z-index: 80;
-  width: 36px;
-  height: 36px;
+  left: -22px;
+  top: -22px;
+  z-index: 220;
+  width: 44px;
+  height: 44px;
   pointer-events: none;
-  border: 1px solid rgba(216, 207, 184, 0.74);
-  mix-blend-mode: difference;
-  transition: width 180ms ease, height 180ms ease, border-color 180ms ease;
+  border: 1px solid rgba(216, 207, 184, 0.78);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(179, 58, 46, 0.72) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 50%, rgba(216, 207, 184, 0.12), transparent 66%);
+  box-shadow:
+    0 0 0 1px rgba(7, 6, 5, 0.82),
+    0 0 24px rgba(179, 58, 46, 0.24),
+    inset 0 0 18px rgba(216, 207, 184, 0.08);
+  opacity: 0.92;
+  mix-blend-mode: normal;
+  transition:
+    left 180ms ease,
+    top 180ms ease,
+    width 180ms ease,
+    height 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.custom-cursor::before,
+.custom-cursor::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.custom-cursor::before {
+  inset: 7px;
+  border: 1px solid rgba(216, 207, 184, 0.24);
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(216, 207, 184, 0.58) 49% 51%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(126, 29, 29, 0.86) 49% 51%, transparent 52%);
+}
+
+.custom-cursor::after {
+  left: 50%;
+  top: -11px;
+  width: 1px;
+  height: 66px;
+  background: linear-gradient(transparent, rgba(179, 58, 46, 0.88), transparent);
+  opacity: 0.62;
+  transform: rotate(-22deg);
 }
 
 .custom-cursor span {
   position: absolute;
-  left: 44px;
-  top: 8px;
+  left: 52px;
+  top: 10px;
+  padding: 0.24rem 0.42rem;
+  border: 1px solid rgba(179, 58, 46, 0.48);
+  background: rgba(7, 6, 5, 0.78);
+  box-shadow: 5px 5px 0 rgba(126, 29, 29, 0.42);
   color: var(--paper);
   font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
   white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .custom-cursor.is-active {
-  width: 58px;
-  height: 58px;
+  left: -34px;
+  top: -34px;
+  width: 68px;
+  height: 68px;
   border-color: var(--red-bright);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(179, 58, 46, 0.86) 0 3px, transparent 4px),
+    radial-gradient(circle at 50% 50%, rgba(179, 58, 46, 0.18), transparent 68%);
+  box-shadow:
+    0 0 0 1px rgba(7, 6, 5, 0.86),
+    0 0 34px rgba(179, 58, 46, 0.5),
+    inset 0 0 24px rgba(216, 207, 184, 0.1);
+}
+
+.custom-cursor.is-active span {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .custom-cursor.is-corridor {
-  z-index: 200;
-  width: 46px;
-  height: 46px;
+  left: -30px;
+  top: -30px;
+  width: 60px;
+  height: 60px;
   border-color: rgba(179, 58, 46, 0.96);
   background:
-    linear-gradient(90deg, transparent 48%, rgba(216, 207, 184, 0.86) 48% 52%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, rgba(216, 207, 184, 0.86) 48% 52%, transparent 52%),
+    radial-gradient(circle at 50% 50%, rgba(179, 58, 46, 0.9) 0 3px, transparent 4px),
+    linear-gradient(90deg, transparent 48%, rgba(216, 207, 184, 0.78) 49% 51%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(216, 207, 184, 0.78) 49% 51%, transparent 52%),
     rgba(126, 29, 29, 0.18);
   box-shadow:
     0 0 0 1px rgba(7, 6, 5, 0.78),
-    0 0 22px rgba(179, 58, 46, 0.72);
-  mix-blend-mode: normal;
+    0 0 30px rgba(179, 58, 46, 0.72),
+    inset 0 0 18px rgba(179, 58, 46, 0.2);
+  animation: cursor-pulse 1100ms steps(2, end) infinite;
+}
+
+.custom-cursor.is-corridor span {
+  opacity: 1;
+  color: var(--red-bright);
+  transform: translateY(0);
 }
 
 .glitch {
@@ -166,6 +238,23 @@
   50% { clip-path: inset(12% 0 62% 0); }
   75% { clip-path: inset(72% 0 8% 0); }
   100% { clip-path: inset(24% 0 44% 0); }
+}
+
+@keyframes cursor-pulse {
+  0%, 100% {
+    opacity: 0.9;
+    filter: blur(0);
+  }
+
+  44% {
+    opacity: 0.72;
+    filter: blur(0.4px);
+  }
+
+  46% {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 @keyframes restricted-alert-in {

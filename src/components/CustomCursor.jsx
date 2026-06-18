@@ -16,18 +16,31 @@ function CustomCursor() {
       cursorRef.current.style.transform = `translate(${pointRef.current.x}px, ${pointRef.current.y}px)`
     }
 
+    const findTarget = (event, selector) => {
+      if (!(event.target instanceof Element)) return null
+      return event.target.closest(selector)
+    }
+
+    const updateCursorState = (event) => {
+      const inCorridor = Boolean(findTarget(event, '#corridor'))
+      const target = findTarget(event, 'button, a, [data-cursor]')
+      cursorRef.current?.classList.toggle('is-corridor', inCorridor)
+      cursorRef.current?.classList.toggle('is-active', Boolean(target))
+      if (labelRef.current) {
+        labelRef.current.textContent = target?.dataset.cursor || (target ? '열람' : inCorridor ? '복도 감지' : '')
+      }
+    }
+
     const move = (event) => {
       pointRef.current = { x: event.clientX, y: event.clientY }
       document.documentElement.style.setProperty('--mouse-x', `${event.clientX}px`)
       document.documentElement.style.setProperty('--mouse-y', `${event.clientY}px`)
-      cursorRef.current?.classList.toggle('is-corridor', Boolean(event.target.closest('#corridor')))
+      updateCursorState(event)
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(draw)
     }
 
     const over = (event) => {
-      const target = event.target.closest('button, a, [data-cursor]')
-      cursorRef.current?.classList.toggle('is-active', Boolean(target))
-      if (labelRef.current) labelRef.current.textContent = target?.dataset.cursor || ''
+      updateCursorState(event)
     }
 
     window.addEventListener('pointermove', move)
