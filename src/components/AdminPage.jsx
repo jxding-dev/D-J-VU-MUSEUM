@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { clearAdminSession, hasAdminSession, verifyAdminPassphrase } from '../adminAuth'
 
 const blankDream = {
   date: '',
@@ -35,6 +36,10 @@ function Field({ label, children }) {
 }
 
 function AdminPage({ data, onChange, onClose, onReset }) {
+  const [authorized, setAuthorized] = useState(hasAdminSession)
+  const [passphrase, setPassphrase] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [authPending, setAuthPending] = useState(false)
   const [dreamForm, setDreamForm] = useState(blankDream)
   const [imageForm, setImageForm] = useState(blankImage)
   const [noteForm, setNoteForm] = useState('')
@@ -192,6 +197,63 @@ function AdminPage({ data, onChange, onClose, onReset }) {
     window.setTimeout(() => setCopyState('JSON 복사'), 1200)
   }
 
+  const submitAuth = async (event) => {
+    event.preventDefault()
+    setAuthPending(true)
+    setAuthError('')
+
+    try {
+      const verified = await verifyAdminPassphrase(passphrase)
+      if (verified) {
+        setAuthorized(true)
+        setPassphrase('')
+      } else {
+        setAuthError('접근 코드가 맞지 않습니다.')
+      }
+    } catch {
+      setAuthError('브라우저 보안 모듈을 사용할 수 없습니다.')
+    } finally {
+      setAuthPending(false)
+    }
+  }
+
+  const logout = () => {
+    clearAdminSession()
+    setAuthorized(false)
+    setPassphrase('')
+  }
+
+  if (!authorized) {
+    return (
+      <aside className="admin-page admin-page--locked" role="dialog" aria-modal="true" aria-labelledby="admin-lock-title">
+        <form className="admin-lock" onSubmit={submitAuth}>
+          <p>기시감 박물관 / 관리자 잠금</p>
+          <h2 id="admin-lock-title">접근 기록 확인</h2>
+          <label className="admin-field">
+            <span>관리자 접근 코드</span>
+            <input
+              autoComplete="current-password"
+              autoFocus
+              required
+              type="password"
+              value={passphrase}
+              onChange={(event) => setPassphrase(event.target.value)}
+            />
+          </label>
+          {authError && <strong className="admin-auth-error">{authError}</strong>}
+          <div className="admin-form-actions">
+            <button disabled={authPending} type="submit">
+              {authPending ? '확인 중' : '봉인 해제'}
+            </button>
+            <button type="button" onClick={onClose}>
+              닫기
+            </button>
+          </div>
+        </form>
+      </aside>
+    )
+  }
+
   return (
     <aside className="admin-page" role="dialog" aria-modal="true" aria-labelledby="admin-title">
       <header className="admin-header">
@@ -201,6 +263,9 @@ function AdminPage({ data, onChange, onClose, onReset }) {
         </div>
         <button type="button" onClick={onClose}>
           닫기
+        </button>
+        <button type="button" onClick={logout}>
+          로그아웃
         </button>
       </header>
 

@@ -197,11 +197,6 @@ function App() {
     }
   }
 
-  const openAdmin = () => {
-    setAdminOpen(true)
-    window.history.pushState(null, '', '#admin')
-  }
-
   const closeAdmin = () => {
     setAdminOpen(false)
     if (window.location.hash === '#admin') {
@@ -237,9 +232,6 @@ function App() {
             {item.label}
           </button>
         ))}
-        <button className={adminOpen ? 'is-active' : ''} type="button" onClick={openAdmin}>
-          관리자
-        </button>
       </nav>
       <Intro entered={entered} onEnter={handleEnter} />
       <Corridor rooms={museumData.rooms} onOpenRoom={setOpenRoom} />
