@@ -47,6 +47,21 @@ function AdminPage({ data, onChange, onClose, onReset }) {
   const updateImage = (key, value) => setImageForm((form) => ({ ...form, [key]: value }))
   const updateRoom = (key, value) => setRoomForm((form) => ({ ...form, [key]: value }))
 
+  const selectImageFile = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.addEventListener('load', () => {
+      setImageForm((form) => ({
+        ...form,
+        src: reader.result,
+        title: form.title || file.name.replace(/\.[^.]+$/, '').replaceAll('-', ' '),
+      }))
+    })
+    reader.readAsDataURL(file)
+  }
+
   const addDream = (event) => {
     event.preventDefault()
     if (!dreamForm.title.trim() || !dreamForm.line.trim()) return
@@ -169,12 +184,19 @@ function AdminPage({ data, onChange, onClose, onReset }) {
           </Field>
           <Field label="이미지 주소">
             <input
-              required
               placeholder="https://... 또는 /D-J-VU-MUSEUM/gallery/file.png"
               value={imageForm.src}
               onChange={(event) => updateImage('src', event.target.value)}
             />
           </Field>
+          <Field label="이미지 파일">
+            <input accept="image/*" type="file" onChange={selectImageFile} />
+          </Field>
+          {imageForm.src && (
+            <div className="admin-image-preview">
+              <img src={imageForm.src} alt="" />
+            </div>
+          )}
           <button type="submit">이미지 추가</button>
         </form>
 
