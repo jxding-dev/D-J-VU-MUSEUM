@@ -1,3 +1,5 @@
+const publicAsset = (path) => `${import.meta.env.BASE_URL}${path}`
+
 export const roomSigns = [
   {
     slug: 'dream-storage',
@@ -82,42 +84,42 @@ export const images = [
     tag: '꿈',
     title: '유리 뒤에서 숨 쉬는 커튼',
     mark: '꿈-091',
-    src: '/gallery/curtain-behind-glass.png',
+    src: publicAsset('gallery/curtain-behind-glass.png'),
   },
   {
     id: 2,
     tag: '기억',
     title: '완성되지 않은 가족사진',
     mark: '기억-204',
-    src: '/gallery/unfinished-family-portrait.png',
+    src: publicAsset('gallery/unfinished-family-portrait.png'),
   },
   {
     id: 3,
     tag: '오류',
     title: '스스로 접힌 복도',
     mark: '오류-022',
-    src: '/gallery/folded-hallway.png',
+    src: publicAsset('gallery/folded-hallway.png'),
   },
   {
     id: 4,
     tag: '금지',
     title: '표식이 바뀐 얼굴',
     mark: '금지-006',
-    src: '/gallery/changing-face-label.png',
+    src: publicAsset('gallery/changing-face-label.png'),
   },
   {
     id: 5,
     tag: '꿈',
     title: '화요일을 들여다보는 창',
     mark: '꿈-118',
-    src: '/gallery/window-into-tuesday.png',
+    src: publicAsset('gallery/window-into-tuesday.png'),
   },
   {
     id: 6,
     tag: '기억',
     title: '사라진 오후가 앉아 있던 의자',
     mark: '기억-377',
-    src: '/gallery/missing-afternoon-chair.png',
+    src: publicAsset('gallery/missing-afternoon-chair.png'),
   },
 ]
 
