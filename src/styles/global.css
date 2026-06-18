@@ -37,12 +37,12 @@ body {
   margin: 0;
   min-width: 320px;
   overflow-x: hidden;
-  cursor: none;
+  cursor: default;
 }
 
 button,
 a {
-  cursor: none;
+  cursor: pointer;
 }
 
 button {
