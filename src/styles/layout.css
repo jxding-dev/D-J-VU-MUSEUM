@@ -598,7 +598,7 @@
 .wall-sign {
   position: relative;
   isolation: isolate;
-  width: clamp(280px, 36vw, 540px);
+  width: clamp(340px, 32vw, 560px);
   min-height: 58vh;
   display: flex;
   flex-direction: column;
@@ -682,32 +682,37 @@
 }
 
 .wall-sign h3 {
-  margin: 18px 0;
+  margin: 14px 0 16px;
   font-family: var(--serif);
-  font-size: clamp(2.4rem, 5.2vw, 5.6rem);
-  line-height: 0.9;
+  font-size: clamp(2.35rem, 3.55vw, 4.4rem);
+  line-height: 0.95;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .wall-sign p {
   color: var(--paper-dim);
-  line-height: 1.55;
+  max-width: 34ch;
+  font-size: clamp(0.92rem, 0.92vw, 1.02rem);
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
 .wall-sign small {
-  max-width: 34ch;
-  margin-top: 18px;
+  max-width: 32ch;
+  margin-top: 16px;
   color: rgba(216, 207, 184, 0.54);
   font-family: var(--mono);
-  font-size: 0.74rem;
-  line-height: 1.55;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
 .wall-sign em {
-  margin-top: 28px;
+  margin-top: 24px;
   color: var(--red-bright);
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-style: normal;
 }
 
@@ -1321,6 +1326,11 @@
   .wall-sign {
     min-height: 360px;
     transform: none;
+  }
+
+  .wall-sign h3 {
+    font-size: clamp(2.45rem, 12vw, 4.1rem);
+    white-space: normal;
   }
 
   .wall-sign:hover {
