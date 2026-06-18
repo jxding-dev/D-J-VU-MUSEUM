@@ -9,9 +9,24 @@ import ImageHall from './components/ImageHall'
 import TextDrawer from './components/TextDrawer'
 import RestrictedRoom from './components/RestrictedRoom'
 import ExhibitPage from './components/ExhibitPage'
-import { roomSigns } from './data/exhibits'
+import AdminPage from './components/AdminPage'
+import {
+  dreams as defaultDreams,
+  images as defaultImages,
+  notes as defaultNotes,
+  roomSigns as defaultRooms,
+} from './data/exhibits'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const STORAGE_KEY = 'deja-vu-museum-admin-data'
+
+const defaultMuseumData = {
+  rooms: defaultRooms,
+  dreams: defaultDreams,
+  images: defaultImages,
+  notes: defaultNotes,
+}
 
 const navItems = [
   { id: 'entrance', label: '입구' },
@@ -23,11 +38,33 @@ const navItems = [
   { id: 'ending', label: '퇴장' },
 ]
 
+const loadMuseumData = () => {
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY)
+    if (!saved) return defaultMuseumData
+    const parsed = JSON.parse(saved)
+    return {
+      rooms: Array.isArray(parsed.rooms) ? parsed.rooms : defaultRooms,
+      dreams: Array.isArray(parsed.dreams) ? parsed.dreams : defaultDreams,
+      images: Array.isArray(parsed.images) ? parsed.images : defaultImages,
+      notes: Array.isArray(parsed.notes) ? parsed.notes : defaultNotes,
+    }
+  } catch {
+    return defaultMuseumData
+  }
+}
+
 function App() {
   const [entered, setEntered] = useState(false)
   const [activeSection, setActiveSection] = useState('entrance')
   const [openRoom, setOpenRoom] = useState(null)
+  const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin')
+  const [museumData, setMuseumData] = useState(loadMuseumData)
   const mainRef = useRef(null)
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(museumData))
+  }, [museumData])
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -114,15 +151,21 @@ function App() {
 
   useEffect(() => {
     const syncRoomFromHash = () => {
+      if (window.location.hash === '#admin') {
+        setAdminOpen(true)
+        return
+      }
+
+      setAdminOpen(false)
       const slug = window.location.hash.replace('#page-', '')
-      const room = roomSigns.find((item) => item.slug === slug)
+      const room = museumData.rooms.find((item) => item.slug === slug)
       if (room) setOpenRoom(room)
     }
 
     syncRoomFromHash()
     window.addEventListener('hashchange', syncRoomFromHash)
     return () => window.removeEventListener('hashchange', syncRoomFromHash)
-  }, [])
+  }, [museumData.rooms])
 
   useEffect(() => {
     const openRoomFromClick = (event) => {
@@ -136,7 +179,7 @@ function App() {
 
       const target = event.target.closest('[data-room]')
       if (!target) return
-      const room = roomSigns.find((item) => item.slug === target.dataset.room)
+      const room = museumData.rooms.find((item) => item.slug === target.dataset.room)
       if (!room) return
       event.preventDefault()
       setOpenRoom(room)
@@ -145,13 +188,30 @@ function App() {
 
     document.addEventListener('click', openRoomFromClick, true)
     return () => document.removeEventListener('click', openRoomFromClick, true)
-  }, [])
+  }, [museumData.rooms])
 
   const closeRoomPage = () => {
     setOpenRoom(null)
     if (window.location.hash.startsWith('#page-')) {
       window.history.pushState(null, '', '#corridor')
     }
+  }
+
+  const openAdmin = () => {
+    setAdminOpen(true)
+    window.history.pushState(null, '', '#admin')
+  }
+
+  const closeAdmin = () => {
+    setAdminOpen(false)
+    if (window.location.hash === '#admin') {
+      window.history.pushState(null, '', '#entrance')
+    }
+  }
+
+  const resetMuseumData = () => {
+    setMuseumData(defaultMuseumData)
+    window.localStorage.removeItem(STORAGE_KEY)
   }
 
   return (
@@ -177,12 +237,15 @@ function App() {
             {item.label}
           </button>
         ))}
+        <button className={adminOpen ? 'is-active' : ''} type="button" onClick={openAdmin}>
+          관리자
+        </button>
       </nav>
       <Intro entered={entered} onEnter={handleEnter} />
-      <Corridor rooms={roomSigns} onOpenRoom={setOpenRoom} />
-      <DreamStorage />
-      <ImageHall />
-      <TextDrawer />
+      <Corridor rooms={museumData.rooms} onOpenRoom={setOpenRoom} />
+      <DreamStorage dreams={museumData.dreams} />
+      <ImageHall images={museumData.images} />
+      <TextDrawer notes={museumData.notes} />
       <RestrictedRoom />
       <section className="ending section-shell" id="ending">
         <p className="section-kicker">퇴장 기록 / 07</p>
@@ -195,6 +258,9 @@ function App() {
         </button>
       </section>
       <ExhibitPage room={openRoom} onClose={closeRoomPage} />
+      {adminOpen && (
+        <AdminPage data={museumData} onChange={setMuseumData} onClose={closeAdmin} onReset={resetMuseumData} />
+      )}
     </main>
   )
 }

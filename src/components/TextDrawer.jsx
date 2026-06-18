@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { notes } from '../data/exhibits'
 
-function TextDrawer() {
+function TextDrawer({ notes }) {
   const [offsets, setOffsets] = useState(() => notes.map(() => ({ x: 0, y: 0 })))
 
   const evadeNote = (event, index) => {
@@ -16,14 +15,16 @@ function TextDrawer() {
     const strength = 34 + (index % 4) * 10
 
     setOffsets((current) =>
-      current.map((offset, offsetIndex) =>
-        offsetIndex === index
+      notes.map((_, offsetIndex) => {
+        const offset = current[offsetIndex] || { x: 0, y: 0 }
+
+        return offsetIndex === index
           ? {
               x: Math.max(-90, Math.min(90, offset.x + directionX * strength)),
               y: Math.max(-54, Math.min(54, offset.y + directionY * Math.round(strength * 0.55))),
             }
-          : offset,
-      ),
+          : offset
+      }),
     )
   }
 

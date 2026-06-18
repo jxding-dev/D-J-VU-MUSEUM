@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { images } from '../data/exhibits'
 
 const filters = ['전체', '꿈', '기억', '오류', '금지']
 
-function ImageHall() {
+function ImageHall({ images }) {
   const [active, setActive] = useState('전체')
-  const visible = useMemo(() => (active === '전체' ? images : images.filter((image) => image.tag === active)), [active])
+  const visible = useMemo(
+    () => (active === '전체' ? images : images.filter((image) => image.tag === active)),
+    [active, images],
+  )
 
   return (
     <section className="image-hall section-shell" id="image-hall">

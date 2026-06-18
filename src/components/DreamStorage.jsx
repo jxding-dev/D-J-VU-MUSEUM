@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
-import { dreams } from '../data/exhibits'
 
-function DreamStorage() {
+function DreamStorage({ dreams }) {
   const sectionRef = useRef(null)
   const [selectedDream, setSelectedDream] = useState(null)
 
